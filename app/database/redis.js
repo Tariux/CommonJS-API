@@ -1,38 +1,42 @@
+const { createClient } = require("redis");
+
 class RedisConeection {
-  constructor(rootNodes) {
-    this.rootNodes = rootNodes;
+
+  connect(db) {
+    try {
+      // here we connect to a single conecction in default
+      // Create a single Redis client
+      const client = createClient({
+        url: "redis://localhost:6379", // Replace with your Redis server URL
+        db: 'db' + db
+      });
+      this.lastConnection = client;
+      return client;
+    } catch (error) {
+      return false;
+    }
+  }
+  async parent() {
+    const parentClientDB = this.connect(1);
+    this.parentClientDB = parentClientDB;
+    return parentClientDB.connect()
+
+  }
+  async employe() {
+    const employeClientDB = this.connect(0);
+    this.employeClientDB = employeClientDB;
+    return employeClientDB.connect()
   }
 
-  async connect() { // here we connect to a single conecction in default
-    const client = createClient();
-
-    client.on("error", (err) => console.log("Redis Client Error", err));
-
-    const conn = await client.connect();
-
-
-
-    return conn;
+  async generateEmployeID(client) {
+    const newUserID = await client.incr('employe:id');
+    return newUserID;
   }
-
-  async cluster() {
-    const cluster = createCluster({ // cluster connect to many databases
-      rootNodes: [
-        {
-          url: "redis://127.0.0.1:16379",
-        },
-        {
-          url: "redis://127.0.0.1:16380",
-        },
-        ...this.rootNodes, // more can be added here
-        // ...
-      ],
-    });
-
-    cluster.on("error", (err) => console.log("Redis Cluster Error", err));
-
-    const conn = await cluster.connect();
-
-    return conn;
+  async generateParentID(client) {
+    const newUserID = await client.incr('parent:id');
+    return newUserID;
   }
 }
+
+
+module.exports = { RedisConeection }
