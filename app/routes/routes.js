@@ -1,5 +1,5 @@
-const EmployeModule = require("../module/employe");
-const HomeModule = require("../module/home");
+const EmployeModule = require("../src/employe");
+const HomeModule = require("../src/home");
 
 function RouteList() {
     return [
@@ -28,7 +28,22 @@ function RouteList() {
             },
             method: 'POST',
         },
-        
+        {
+            path: '/employeeService',
+            callback: (req , res) => {
+                new EmployeModule(req , res)
+    
+            },
+            method: 'PUT',
+        },
+        {
+            path: '/employeeService',
+            callback: (req , res) => {
+                new EmployeModule(req , res)
+    
+            },
+            method: 'DELETE',
+        },
     ]
 }
 

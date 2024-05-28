@@ -1,3 +1,4 @@
+const XResult = require("../helper/error");
 const { helper, Xhelper } = require("../helper/functions");
 const { RouteList } = require("../routes/routes");
 const XResponse = require("./response");
@@ -32,14 +33,12 @@ class XRouter {
     }
 
     if (!matchRoute || typeof matchRoute !== "object") {
-
-      XResponse.send404(res);
+      new XResult("Page Not Found!", this.response, 404);
       return;
     }
 
     if (typeof matchRoute["callback"] !== "function") {
-
-      XResponse.send404(res);
+      new XResult("Page Not Found!", this.response, 404);
       return;
     }
     if (req.method !== matchRoute["method"]) {

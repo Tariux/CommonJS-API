@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 const XRequest = require("./request");
+const XResult = require("../helper/error");
 
 class XResponse extends XRequest {
   constructor(request, response) {
-    super()
+    super();
     this.request = request;
     this.response = response;
 
@@ -12,32 +13,44 @@ class XResponse extends XRequest {
   }
   async init() {
     this.body = await this.parseBody(this.request);
-    switch (this.request.method) {
-      case "GET":
-        this.calledMethod = "index";
-        break;
-      case "POST":
-        this.calledMethod = "post";
-        break;
-      case "PUT":
-        this.calledMethod = "update";
-        break;
-      case "DELETE":
-        this.calledMethod = "drop";
-        break;
 
-      default:
-        this.calledMethod = false;
-        break;
+    try {
+      
+      switch (this.request.method) {
+        case "GET":
+          this.calledMethod = "index";
+          break;
+        case "POST":
+          this.calledMethod = "post";
+          break;
+        case "PUT":
+          this.calledMethod = "update";
+          break;
+        case "DELETE":
+          this.calledMethod = "drop";
+          break;
+
+        default:
+          this.calledMethod = false;
+          break;
+      }
+
+
+    } catch (error) {
+      new XResult("Unexpected Error!", this.response, error);
+      
     }
 
     try {
-      eval(`this.${this.calledMethod}()`);
+      eval(`this.${this.calledMethod}()`); 
+
     } catch (error) {
-      console.log("Error in loading method " + this.calledMethod, error);
-      XResponse.send404(this.response);
+      new XResult("Unexpected Error!", this.response, error);
+      
     }
-  }
+
+
+  } 
   setHeader(type, status = 200) {
     this.response.writeHead(status, { "Content-Type": type });
   }
@@ -47,9 +60,9 @@ class XResponse extends XRequest {
   }
   sendJSON(data, status = 200) {
     this.response.writeHead(status, {
-      "Content-Type": "application/javascript",
+      "Content-Type": "application/json",
     });
-    this.response.end(data);
+    this.response.end(JSON.stringify(data));
   }
   sendView(view, ext = "html") {
     try {
@@ -59,7 +72,7 @@ class XResponse extends XRequest {
       this.response.writeHead(200, { "Content-Type": `text/${ext}` });
       this.response.end(viewData);
     } catch (error) {
-      XResponse.send404(this.response);
+      new XResult("Page Not Found!", this.response, 404);
     }
   }
 
@@ -67,6 +80,8 @@ class XResponse extends XRequest {
     let P404 = fs.readFileSync(
       `${path.dirname(__dirname)}/components/404.html`
     );
+
+    
     response.writeHead(404, { "Content-Type": `text/html` });
     response.end(P404);
   }

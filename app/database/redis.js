@@ -1,42 +1,57 @@
-const { createClient } = require("redis");
+const redis = require("redis");
 
 class RedisConeection {
-
-  connect(db) {
-    try {
-      // here we connect to a single conecction in default
-      // Create a single Redis client
-      const client = createClient({
-        url: "redis://localhost:6379", // Replace with your Redis server URL
-        db: 'db' + db
+  constructor(params) {
+    this.client = redis.createClient({
+      url: "redis://127.0.0.1:6379",
+    });
+    this.client.on("error", (err) => console.log("Redis Cluster Error", err));
+    this.client.on("connect", () => console.log("Connected to Redis"));
+  }
+  selectDatabase(dbIndex) {
+    return new Promise((resolve, reject) => {
+      this.client.select(dbIndex, (err, res) => {
+        if (err) {
+          resolve(err);
+        } else {
+          resolve(res);
+        }
       });
-      this.lastConnection = client;
-      return client;
+    });
+  }
+  selectParentDB() {
+    return this.selectDatabase(1);
+  }
+  selectEmployeDB() {
+    return this.selectDatabase(0);
+  }
+  safeQuery(callback) {
+    try {
+      return new Promise(async (resolve, reject) => {
+        if (typeof callback !== "function") {
+          resolve(false);
+        } else {
+          await this.client.connect();
+          const cb = await callback();
+          await this.client.quit();
+
+          resolve(cb);
+        }
+      });
     } catch (error) {
+      console.log("ERROR IN RUNNING SAFE QUERY: ", error);
       return false;
     }
   }
-  async parent() {
-    const parentClientDB = this.connect(1);
-    this.parentClientDB = parentClientDB;
-    return parentClientDB.connect()
 
+  employeUniqueID() {
+    let id = this.client.incr("employe:id@increment");
+    return id;
   }
-  async employe() {
-    const employeClientDB = this.connect(0);
-    this.employeClientDB = employeClientDB;
-    return employeClientDB.connect()
-  }
-
-  async generateEmployeID(client) {
-    const newUserID = await client.incr('employe:id');
-    return newUserID;
-  }
-  async generateParentID(client) {
-    const newUserID = await client.incr('parent:id');
-    return newUserID;
+  parentUniqueID() {
+    let id = this.client.incr("parent:id@increment");
+    return id;
   }
 }
 
-
-module.exports = { RedisConeection }
+module.exports = { RedisConeection };

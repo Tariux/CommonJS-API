@@ -2,19 +2,18 @@ const XCore = require("../core");
 const { RedisConeection } = require("../database/redis");
 
 class XRequest {
+  constructor() {
+    this.redis = new RedisConeection();
+
+  }
   isValidRequest() {
     if (!this.request || !this.request.method) {
       return false;
     }
     return true;
   }
-  async initDB() {
-    this.redis = new RedisConeection();
-    this.parentDB = await this.redis.parent();
-    this.employeDB = await this.redis.employe();
 
-  }
-  parseBody(request) {
+  async parseBody(request) {
     return new Promise((resolve, reject) => {
       let body = "";
       let bodyChunks = [];
@@ -31,9 +30,19 @@ class XRequest {
       });
 
       request.on("end", () => {
+    
+    
+    
         let mergedBodyChunkBuffer = Buffer.concat(bodyChunks);
         body = mergedBodyChunkBuffer.toString("utf8");
-        resolve(JSON.parse(body || '{}'));
+        if (body.length > 0) {
+
+          resolve(JSON.parse(body || '{}'));
+          
+        } else {
+          resolve({})
+        }
+
       });
     });
   }

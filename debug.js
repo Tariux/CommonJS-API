@@ -1,20 +1,20 @@
+const { createClient, createCluster } = require("redis");
 const { RedisConeection } = require("./app/database/redis");
 
-
 async function testRedis() {
-    const redis = new RedisConeection();
+async function test() {
+  console.log(await conn.employeUniqueID());
+  conn.selectDatabase(14)
+  conn.client.set("this is for 1st db", "MEOW");
 
-    let ttt = await redis.parent();
-    console.log(typeof ttt);
-    async function generateUserID(client) {
-        const newUserID = await client.incr('user:id');
-        return newUserID;
-    
-      }
-      await generateUserID(ttt)
 }
+  const conn = new RedisConeection();
 
-testRedis()
+
+  conn.safeQuery(test)
+
+}
+testRedis();
 // const fs = require("fs");
 
 // function sendView(view , ext = 'html') {
@@ -24,6 +24,5 @@ testRedis()
 //     console.log('type viewData' , typeof viewData);
 // }
 
+
 // sendView('404222');
-
-
