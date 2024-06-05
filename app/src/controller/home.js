@@ -1,8 +1,7 @@
-const XResponse = require("../callback/response");
+const XController = require("../../callback/controller");
 
-class HomeModule extends XResponse {
-    constructor(request, response) {
-        super(request, response)
+class HomeModule {
+    constructor() {
     }
     index() {
         this.sendView('home');

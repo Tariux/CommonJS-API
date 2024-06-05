@@ -1,12 +1,12 @@
 const redis = require("redis");
 
 class RedisConeection {
-  constructor(params) {
+  constructor() {
     this.client = redis.createClient({
       url: "redis://127.0.0.1:6379",
     });
-    this.client.on("error", (err) => console.log("Redis Cluster Error", err));
-    this.client.on("connect", () => console.log("Connected to Redis"));
+    this.client.on("error", (err) => console.log(":: + Redis Cluster Error"));
+    this.client.on("connect", () => console.log("\x1b[38;5;2m" , `:: + Connected to Redis`));
   }
   selectDatabase(dbIndex) {
     return new Promise((resolve, reject) => {
@@ -25,14 +25,14 @@ class RedisConeection {
   selectEmployeDB() {
     return this.selectDatabase(0);
   }
-  safeQuery(callback) {
+  async safeQuery(callback) { 
     try {
       return new Promise(async (resolve, reject) => {
         if (typeof callback !== "function") {
           resolve(false);
         } else {
           await this.client.connect();
-          const cb = await callback();
+          const cb = await callback(); 
           await this.client.quit();
 
           resolve(cb);

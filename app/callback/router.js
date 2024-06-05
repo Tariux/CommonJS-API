@@ -1,55 +1,66 @@
-const XResult = require("../helper/error");
-const { helper, Xhelper } = require("../helper/functions");
-const { RouteList } = require("../routes/routes");
-const XResponse = require("./response");
-
 class XRouter {
-  routes = RouteList();
+  routes = [];
+  add(route, method, callback) {
+    this.routes[route] = this.routes[route] || {};
 
-  addRoute(route, callback, params = []) {
-    this.routes[route] = callback(params);
+    this.routes[route][method] = {
+      path: route,
+      method: method,
+      callback: callback,
+    };
   }
 
   getRoutes() {
     return this.routes;
   }
 
-  route(pathname, req, res) {
-    let matchRoute;
-    let routesList = Xhelper.findItemsByKeyValueInArray(
-      this.routes,
-      "path",
-      pathname
-    );
-
-    if (routesList.length === 1) {
-      matchRoute = routesList[0];
-    } else {
-      matchRoute = Xhelper.findItemsByKeyValueInArray(
-        routesList,
-        "method",
-        req.method
-      )[0];
+  post(route, callback = () => {}) {
+    this.add(route, "POST", callback);
+  }
+  get(route, callback = () => {}) {
+    this.add(route, "GET", callback);
+  }
+  put(route, callback = () => {}) {
+    this.add(route, "PUT", callback);
+  }
+  delete(route, callback = () => {}) {
+    this.add(route, "DELETE", callback);
+  }
+  async route(pathname, req, res , body) {
+    const matchRoute = this.routes[pathname][req.method];
+    if (
+      !matchRoute ||
+      typeof matchRoute !== "object" ||
+      typeof matchRoute["callback"] !== "function"
+    ) {
+      throw "صفحه مورد نظر یافت نشد!";
     }
 
-    if (!matchRoute || typeof matchRoute !== "object") {
-      new XResult("Page Not Found!", this.response, 404);
-      return;
-    }
-
-    if (typeof matchRoute["callback"] !== "function") {
-      new XResult("Page Not Found!", this.response, 404);
-      return;
-    }
     if (req.method !== matchRoute["method"]) {
-      res.writeHead(500, { "Content-Type": "text/plain" });
-      res.end("Method does not match");
-
-      return;
+      throw "درخواست مورد نظر یافت نشد!";
     }
 
+    const calledObject = new matchRoute["callback"](req, res);
+    const calledMethod = this.detectMethod(req);
     // if is a valid route
-    matchRoute["callback"](req, res);
+    await calledObject[calledMethod](req , res);
+
+  }
+
+  detectMethod(request) {
+    switch (request.method) {
+      case "GET":
+        return "index";
+      case "POST":
+        return "post";
+      case "PUT":
+        return "update";
+      case "DELETE":
+        return "drop";
+      default:
+        return false;
+    }
+
   }
 }
 

@@ -1,36 +1,34 @@
 const http = require("node:http");
-const url = require("url");
-const XRouter = require("./callback/router");
-const XError = require("./helper/error");
-const XResult = require("./helper/error");
-
+const defaultConfig = require("./config/default.json");
+const XController = require("./callback/controller");
+const { _cwelcome } = require("./helper/client-response");
 class XCore {
-  constructor(PORT) {
+  constructor() {
+    const PORT = defaultConfig.port;
     this.PORT = PORT;
   }
 
   init() {
+    try {
+      const controller = new XController();
+      
       const server = http.createServer(async (request, response) => {
-        this.handleInit(request, response);
+
+        controller.initContoller(request, response);
       });
       server.listen(this.PORT, () => {
-        console.log(`SERVER IS RUNNING | PORT: ${this.PORT}`);
+        _cwelcome()
       });
 
-  }
-  async handleInit(request, response) {
-    try {
-      this.request = request;
-      this.response = response;
-      const Router = new XRouter();
-      const urlParse = url.parse(this.request.url, true);
-      this.clientPath = urlParse.pathname;
-      console.log(`Path ${this.clientPath} Called`);
-      Router.route(this.clientPath, this.request, this.response);
-  
-    } catch (error) {
-      new XResult(error.message , this.response , error);
 
+
+    } catch (error) {
+      return _cr(
+        response,
+        error.statusCode || 500,
+        "خطای ناشناخته رخ داد!",
+        error
+      );
     }
   }
 }

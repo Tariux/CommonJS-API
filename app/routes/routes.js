@@ -1,52 +1,16 @@
-const EmployeModule = require("../src/employe");
-const HomeModule = require("../src/home");
+const XRouter = require("../callback/router")
+const { EmployeController } = require("../src/controller/employeController")
 
-function RouteList() {
-    return [
-        {
-            path: '/',
-            callback: (req , res) => {
-                new HomeModule(req , res)
-    
-            },
-            method: 'GET',
-        }, // default path
-        {
-            path: '/employeeService',
-            callback: (req , res) => {
-                new EmployeModule(req , res)
-            
-    
-            },
-            method: 'GET',
-        },
-        {
-            path: '/employeeService',
-            callback: (req , res) => {
-                new EmployeModule(req , res)
-    
-            },
-            method: 'POST',
-        },
-        {
-            path: '/employeeService',
-            callback: (req , res) => {
-                new EmployeModule(req , res)
-    
-            },
-            method: 'PUT',
-        },
-        {
-            path: '/employeeService',
-            callback: (req , res) => {
-                new EmployeModule(req , res)
-    
-            },
-            method: 'DELETE',
-        },
-    ]
-}
+const router = new XRouter()
+router.post("/employeeService" , EmployeController)
+router.get("/employeeService" , EmployeController)
+router.put("/employeeService" , EmployeController)
+router.delete("/employeeService" , EmployeController)    
+
+
 
 module.exports = {
-    RouteList
+    router
 }
+
+
