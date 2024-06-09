@@ -12,7 +12,10 @@ class XHelper {
     return out;
   }
 
-  static isEmpty (value) {
+  static checkThe (value) {
+    if (typeof value === 'boolean') {
+      return value
+    }
     return (
       // null or undefined
       (value == null) ||

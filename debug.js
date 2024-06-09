@@ -1,16 +1,9 @@
+const { RedisConnection } = require("./app/database/redis");
 
+async function settt() {
+  //console.log(await  db.dbEmploye);
+  console.log(await (await RedisConnection.parent).set('xxx' , 'yyy'));
 
-class Cat {
-  constructor(value) {
-    this.value = value;
-  }
-  valueOf() {
-    return this.meow(this.value);
-  }
-  meow(X) {
-    return X;
-  }
 }
 
-var foo = new Cat(4);
-console.log(+foo); // 4
+settt()

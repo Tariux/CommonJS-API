@@ -11,7 +11,7 @@ function _cr(responseObj, statusCode, message, response) {
     status: status,
     statusCode: statusCode,
     message: message,
-    response: response,
+    ...response,
   };
 
   _lr(statusCode , message , response , responseObj)
@@ -35,18 +35,15 @@ function _lr(statusCode, message, response , responseObj = {}) {
     color = "\x1b[38;5;9m"
   }
 
-  const result = {
-    status: status,
-    statusCode: statusCode,
-    message: message,
-    response: response,
-  };
   console.log(color , `:: Response ${responseObj.req.url} ${responseObj.req.method}!`);
   console.log(color , `:: status: ${JSON.stringify(status)} ${JSON.stringify(statusCode)}!`);
   console.log(color , `:: response-type: ${JSON.stringify(typeof response)}`);
   console.log(color , `:: response-value: ${JSON.stringify(response).substr(0 , 20)}`);
+  if (response instanceof Error) {
+    console.log(color , `:: error-message: ${response.message}`);
+    console.log(color , `:: error-name: ${response.name}`);
+  }
   console.log(color , `::::::`);
-
 
 
 
