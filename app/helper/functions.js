@@ -1,8 +1,8 @@
 class XHelper {
-  static findItemsByKeyValueInArray(items, key, value) {
+  static findItemsByKeyValueInArray(items, key, value) { // find items by key and value
     return items.filter((item) => item[key] === value);
   }
-  static getUrlParameters(url) {
+  static getUrlParameters(url) { // ? get url paramets ?x=1
     var out = {};
     var str = url.search.replace("?", "");
     var subs = str.split(`&`).map((si) => {
@@ -12,7 +12,7 @@ class XHelper {
     return out;
   }
 
-  static checkThe (value) {
+  static checkThe (value) { // ? this will check force a value
     if (typeof value === 'boolean') {
       return value
     }

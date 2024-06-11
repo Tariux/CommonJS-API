@@ -1,34 +1,36 @@
 class XRouter {
   routes = [];
-  add(route, method, callback) {
+  add(route, method, callback , middleware) { // ? add and define new route to routes variable 
     this.routes[route] = this.routes[route] || {};
 
-    this.routes[route][method] = {
+    this.routes[route][method] = { // ? set key and values for each route
       path: route,
       method: method,
       callback: callback,
+      middleware: middleware,
+      
     };
   }
 
-  getRoutes() {
+  getRoutes() { // ? get all routes
     return this.routes;
   }
 
-  post(route, callback = () => {}) {
-    this.add(route, "POST", callback);
+  post(route, callback = () => {} , middleware = () => {return true}) { // ? define post
+    this.add(route, "POST", callback , middleware);
   }
-  get(route, callback = () => {}) {
-    this.add(route, "GET", callback);
+  get(route, callback = () => {} , middleware = () => {return true}) { // ? define get
+    this.add(route, "GET", callback , middleware);
   }
-  put(route, callback = () => {}) {
-    this.add(route, "PUT", callback);
+  put(route, callback = () => {} , middleware = () => {return true}) { // ? define put
+    this.add(route, "PUT", callback , middleware);
   }
-  delete(route, callback = () => {}) {
-    this.add(route, "DELETE", callback);
+  delete(route, callback = () => {} , middleware = () => {return true}) { // ? define delete
+    this.add(route, "DELETE", callback , middleware);
   }
-  async route(pathname, req, res , body) {
-    const matchRoute = this.routes[pathname][req.method];
-    if (
+  async route(pathname, req, res, body) { // ? this function will do the routing job and call the called method and object
+    const matchRoute = this.routes[pathname][req.method]; // ? find match route
+    if ( // ? check route is defined or not
       !matchRoute ||
       typeof matchRoute !== "object" ||
       typeof matchRoute["callback"] !== "function"
@@ -36,18 +38,21 @@ class XRouter {
       throw "صفحه مورد نظر یافت نشد!";
     }
 
+     // ? check route method is defined or not
     if (req.method !== matchRoute["method"]) {
       throw "درخواست مورد نظر یافت نشد!";
     }
+    if (matchRoute["middleware"](body)) { // ? calling the middleware for validate
 
-    const calledObject = new matchRoute["callback"](req, res);
-    const calledMethod = this.detectMethod(req);
-    // if is a valid route
-    await calledObject[calledMethod](req , res);
+      // * this is where all program will load Service/Controller and pass data -> req , res
+      const calledObject = new matchRoute["callback"](req, res);
+      const calledMethod = this.detectMethod(req);
+      await calledObject[calledMethod](req , res);
+    }
 
   }
 
-  detectMethod(request) {
+  detectMethod(request) { // ? this will create a template is my modules for coding better just functions index/post/update/drop is callable
     switch (request.method) {
       case "GET":
         return "index";

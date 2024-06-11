@@ -4,50 +4,50 @@ const { router } = require("../routes/routes");
 const url = require("url");
 
 class XController {
-  constructor() {
+  constructor() { // ? will init router in first run
     this.router = router;
   }
 
   async initContoller(request, response) {
 
+
+    // ? some fancy stuff 
     console.log('\x1b[36m%s\x1b[0m' , ` :::::: ${request.method} Request!`);
     console.log('\x1b[36m%s\x1b[0m' , ` :: route: ${request.url}`);
     console.log('\x1b[36m%s\x1b[0m' , ` :: ip: (${request.socket.localAddress})`);
     console.log('\x1b[36m%s\x1b[0m' , ` ::`);
 
-
-
+    // ? parsing data to this.object
     this.request = request;
     this.response = response;
-
-
     this.request.body = await this.parseBody(this.request);
 
     try {
       this.url = url.parse(this.request.url, true);
 
+      // ? first check is a valid request
       if (this.isValidRequest()) {
-        await this.router.route(this.url.pathname, this.request, this.response);
+        await this.router.route(this.url.pathname, this.request, this.response , this.body); // * route method and pathname to router class
       } else {
-        return _cr(response, 500, "درخواست نامعتبر!", false);
+        return _cr(response, 500, "درخواست نامعتبر!", false); // ! send error
       }
-    } catch (error) {
+    } catch (error) { // ! send error
       return _cr(
         response,
-        error.statusCode || 500,
-        "خطای ناشناخته رخ داد!",
+        500,
+        "خطای ناشناخته در مسیریابی برنامه رخ داد!",
         error
       );
     }
   }
-  isValidRequest() {
+  isValidRequest() { // ? checking by is set method for validate request
     if (!this.request || !this.request.method) {
       return false;
     }
     return true;
   }
 
-  async parseBody(request) {
+  async parseBody(request) { // ? parse chunked body into object
     return new Promise((resolve, reject) => {
       let body = "";
       let bodyChunks = [];

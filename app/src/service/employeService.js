@@ -1,123 +1,211 @@
 const { Redis } = require("../../database/redis");
-const { XHelper } = require("../../helper/functions");
 
 class EmployeService {
   constructor() {
-    this.initDefaultEmploye();
+    this.initDefaultEmploye(); // ? this will init default user after calling this service
   }
 
-  async initDefaultEmploye() {
+  async initDefaultEmploye() { // ? this function creates a default user for initialize program
     try {
-      let defaultKey = `employe:1`;
-      let defaultEmploye = await (await Redis.employe).hGetAll(defaultKey);
 
-      if (Object.keys(defaultEmploye).length <= 0) {
-        let defaultData = {
-          fname: "default",
-          lname: "default",
+      // ? making the keys
+      let defaultKey = `employe:1`;
+
+      let defaultEmploye = await (await Redis.employe).hGetAll(defaultKey); // ? get data for check created before or not
+
+      if (Object.keys(defaultEmploye).length <= 0) { // ? check if is not created
+        let defaultData = { // ? making data template
+          name: "default",
           age: "default",
         };
         const createDefault = await (
           await Redis.employe
-        ).hSet(defaultKey, { id: 1, data: JSON.stringify(defaultData) });
+        ).hSet(defaultKey, { id: 1, data: JSON.stringify(defaultData) }); // * this will creates a default user by data and response
         return {
           message: "کاربر دیفالت اضافه شد با شناسه 1 دوباره امتحان کنید",
           response: createDefault,
         };
-      } else {
+      } else { // * return default data if created before
         return defaultEmploye;
       }
     } catch (error) {
-      console.log(error);
-      return error;
+      return {
+        status: false,
+        statusCode: 500,
+        response: error,
+      };
     }
   }
 
   async getEmploye(id) {
-    if (!id) {
-      return false;
-    }
+
     try {
+
+      // ? make the keys
       let employe_key = `employe:${id}`;
 
-      let employeData = await (await Redis.employe).hGetAll(employe_key);
-      if (Object.keys(employeData).length > 0) {
-        return { response: employeData };
+      let employeData = await (await Redis.employe).hGetAll(employe_key); // ? get employe data
+      if (Object.keys(employeData).length > 0) { // ! validate employe exists or not
+        return { response: employeData }; // * send response
       } else {
-        return false
+        return {
+          status: false,
+          statusCode: 500,  
+        } // ! send error
       }
     } catch (error) {
-      return false;
+      return { // ! send error
+        status: false,
+        statusCode: 500,
+        response: error,
+      };
     }
   }
 
   async createEmploye(id, parent, data) {
-    if (!id || !parent || !data) {
-      return {
-        message: "اطلاعات وارد شده صحیح نیست!",
-      };
-    }
 
+
+    // ? make the keys
     let employe_key = `employe:${id}`
     let parent_key = `parent:${id}`
     let employe_parent_key = `employe:${parent}`
 
-    let parentData = await (await Redis.employe).hGetAll(employe_parent_key);
-
-    if (Object.keys(parentData).length <= 0) {
-      return({
+    let parentData = await (await Redis.employe).hGetAll(employe_parent_key); // ! check parent exists or not
+    if (Object.keys(parentData).length <= 0) { 
+      return({ // ! send error
         message: "این کاربر والد وجود ندارد!",
+        status: false,
+        statusCode: 500,
+
       })
     }
 
-    let employeData = {
+
+
+    let checkEmploye = await (await Redis.employe).hGetAll(employe_key); // ! check employe exists or not
+    if (Object.keys(checkEmploye).length > 0) {
+      return({ // ! send error
+        message: "این شناسه کاربر وجود دارد!",
+        status: false,
+        statusCode: 500,
+      })
+    }
+
+    let employeData = { // ? make data ready from template
       id: id,
       data: JSON.stringify(data),
     };
 
     try {
-
       
       let createEmploye = await (
         await Redis.employe
-      ).hSet(employe_key, employeData);
-      await (await Redis.parent).set(parent_key, parent);
-      return createEmploye;
+      ).hSet(employe_key, employeData); // ? create employe data
+
+      await (await Redis.parent).set(parent_key, parent); // ? create parent relation
+
+      return createEmploye;  // * send response
+
     } catch (error) {
-      console.log(error);
       return {
         message: "خطایی در انجام عملیات ایجاد شد!",
+        status: false,
+        statusCode: 500,
         response: error,
+
       };
     }
   }
 
 
   async dropEmploye(id) {
-    if (!id) {
-      return false;
-    }
+
     try {
-      let eid = id || false;
+
+      // ? try to make the keys
+      let eid = id;
       let employe_key = `employe:${eid}`;
       let parent_key = `parent:${eid}`;
 
-      let employeData = await (await Redis.employe).hGetAll(employe_key);
+      let employeData = await (await Redis.employe).hGetAll(employe_key); // ? get employe data by sent "id"
 
-      if (Object.keys(employeData).length <= 0) {
+      if (Object.keys(employeData).length <= 0) { // ! check employe exists or not
         return({
           message: "این کارمند وجود ندارد!",
         })
       }
 
-      await (await Redis.employe).del(employe_key);
-      await (await Redis.parent).del(parent_key);
+      await (await Redis.employe).del(employe_key); // ? delete employe data
+      await (await Redis.parent).del(parent_key); // ? delete parent relation key
 
-      return true;
+      return true; // * send response true
+
     } catch (error) {
-      return false;
-    }
+      return { // ! send error
+        status: false,
+        statusCode: 500,
+        response: error,
+      };
+        }
   }
+
+
+  async updateEmploye(id, parent, data) {
+    // ? making keys
+    let employe_key = `employe:${id}`
+    let parent_key = `parent:${id}`
+    let employe_parent_key = `employe:${parent}`
+
+
+    // ! check employe exists
+    let employeData = await (await Redis.employe).hGetAll(employe_key);
+    if (Object.keys(employeData).length <= 0) {
+      return({
+        message: "این کاربر وجود ندارد!",
+        
+      })
+    }
+
+    // ! check parent exists
+    let parentData = await (await Redis.employe).hGetAll(employe_parent_key);
+    if (Object.keys(parentData).length <= 0) {
+      return({
+        message: "این کاربر والد وجود ندارد!",
+      })
+    }
+
+    
+
+
+      let newData = { // ? make new data from template
+        id: id,
+        data: JSON.stringify(data),
+      }
+
+      try {
+        await (await Redis.employe).hSet(employe_key, newData); // ? update employe
+        await (await Redis.parent).set(parent_key, parent); // ? update parent
+
+        newData.data = JSON.parse(newData.data) // ? restore newData to JSON
+
+        return { // * send response
+          message: "عملیات بروزرسانی با موفقیت انجام شد",
+          response: newData
+        }
+
+      } catch (error) {
+          return { // ! send error
+            message: "خطایی در بروزرسانی اطلاعات پیش آمد!", 
+            status: false,
+            statusCode: 500,
+            response: error
+          }
+      }
+
+
+
+  }
+
 }
 
 module.exports = { EmployeService };
