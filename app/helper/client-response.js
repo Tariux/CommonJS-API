@@ -6,10 +6,6 @@ function _cr(responseObj, statusCode, message, response) { // ? client response
   if (statusCode >= 200 && statusCode <= 300) {
     status = true;
   }
-  console.log(typeof response , response);
-  if (true) {
-    status = false
-  }
 
 
 
