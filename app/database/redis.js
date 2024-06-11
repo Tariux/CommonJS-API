@@ -22,8 +22,8 @@ class RedisManager { // ? database class
     this.client.on("connect", () => console.log("\x1b[38;5;2m" , `:: + Connected to Redis`));
     
     // ? create two seprate connection for manage better
-    this.parent =  this.client.duplicate({database:1}).connect()
-    this.employe =  this.client.duplicate({database:0}).connect()
+    this.parent =  (await this.client.duplicate({database:1}).connect())
+    this.employe =  (await this.client.duplicate({database:0}).connect())
 
   }
 

@@ -11,16 +11,14 @@ class EmployeService {
       // ? making the keys
       let defaultKey = `employe:1`;
 
-      let defaultEmploye = await (await Redis.employe).hGetAll(defaultKey); // ? get data for check created before or not
+      let defaultEmploye = await Redis.employe.hGetAll(defaultKey); // ? get data for check created before or not
 
       if (Object.keys(defaultEmploye).length <= 0) { // ? check if is not created
         let defaultData = { // ? making data template
           name: "default",
           age: "default",
         };
-        const createDefault = await (
-          await Redis.employe
-        ).hSet(defaultKey, { id: 1, data: JSON.stringify(defaultData) }); // * this will creates a default user by data and response
+        const createDefault = await Redis.employe.hSet(defaultKey, { id: 1, data: JSON.stringify(defaultData) }); // * this will creates a default user by data and response
         return {
           message: "کاربر دیفالت اضافه شد با شناسه 1 دوباره امتحان کنید",
           response: createDefault,
@@ -44,7 +42,7 @@ class EmployeService {
       // ? make the keys
       let employe_key = `employe:${id}`;
 
-      let employeData = await (await Redis.employe).hGetAll(employe_key); // ? get employe data
+      let employeData = await Redis.employe.hGetAll(employe_key); // ? get employe data
       if (Object.keys(employeData).length > 0) { // ! validate employe exists or not
         return { response: employeData }; // * send response
       } else {
@@ -70,7 +68,7 @@ class EmployeService {
     let parent_key = `parent:${id}`
     let employe_parent_key = `employe:${parent}`
 
-    let parentData = await (await Redis.employe).hGetAll(employe_parent_key); // ! check parent exists or not
+    let parentData = await Redis.employe.hGetAll(employe_parent_key); // ! check parent exists or not
     if (Object.keys(parentData).length <= 0) { 
       return({ // ! send error
         message: "این کاربر والد وجود ندارد!",
@@ -82,7 +80,7 @@ class EmployeService {
 
 
 
-    let checkEmploye = await (await Redis.employe).hGetAll(employe_key); // ! check employe exists or not
+    let checkEmploye = await Redis.employe.hGetAll(employe_key); // ! check employe exists or not
     if (Object.keys(checkEmploye).length > 0) {
       return({ // ! send error
         message: "این شناسه کاربر وجود دارد!",
@@ -98,11 +96,9 @@ class EmployeService {
 
     try {
       
-      let createEmploye = await (
-        await Redis.employe
-      ).hSet(employe_key, employeData); // ? create employe data
+      let createEmploye = await Redis.employe.hSet(employe_key, employeData); // ? create employe data
 
-      await (await Redis.parent).set(parent_key, parent); // ? create parent relation
+      await Redis.parent.set(parent_key, parent); // ? create parent relation
 
       return createEmploye;  // * send response
 
@@ -127,7 +123,7 @@ class EmployeService {
       let employe_key = `employe:${eid}`;
       let parent_key = `parent:${eid}`;
 
-      let employeData = await (await Redis.employe).hGetAll(employe_key); // ? get employe data by sent "id"
+      let employeData = await Redis.employe.hGetAll(employe_key); // ? get employe data by sent "id"
 
       if (Object.keys(employeData).length <= 0) { // ! check employe exists or not
         return({
@@ -135,8 +131,8 @@ class EmployeService {
         })
       }
 
-      await (await Redis.employe).del(employe_key); // ? delete employe data
-      await (await Redis.parent).del(parent_key); // ? delete parent relation key
+      await Redis.employe.del(employe_key); // ? delete employe data
+      await Redis.parent.del(parent_key); // ? delete parent relation key
 
       return true; // * send response true
 
@@ -158,7 +154,7 @@ class EmployeService {
 
 
     // ! check employe exists
-    let employeData = await (await Redis.employe).hGetAll(employe_key);
+    let employeData = await Redis.employe.hGetAll(employe_key);
     if (Object.keys(employeData).length <= 0) {
       return({
         message: "این کاربر وجود ندارد!",
@@ -167,7 +163,7 @@ class EmployeService {
     }
 
     // ! check parent exists
-    let parentData = await (await Redis.employe).hGetAll(employe_parent_key);
+    let parentData = await Redis.employe.hGetAll(employe_parent_key);
     if (Object.keys(parentData).length <= 0) {
       return({
         message: "این کاربر والد وجود ندارد!",
@@ -183,8 +179,14 @@ class EmployeService {
       }
 
       try {
-        await (await Redis.employe).hSet(employe_key, newData); // ? update employe
-        await (await Redis.parent).set(parent_key, parent); // ? update parent
+        // TODO: understand this how it works
+        try {
+          
+        } catch (error) {
+          
+        }
+        await Redis.employe.hSet(employe_key, newData); // ? update employe
+        await Redis.parent.set(parent_key, parent); // ? update parent
 
         newData.data = JSON.parse(newData.data) // ? restore newData to JSON
 

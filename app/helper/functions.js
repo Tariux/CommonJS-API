@@ -17,14 +17,14 @@ class XHelper {
       return value
     }
     return (
-      // null or undefined
+      // ! null or undefined
       (value == null) ||
       (value == false) ||
 
-      // has length and it's zero
+      // ! has length and it's zero
       (value.hasOwnProperty('length') && value.length === 0) ||
   
-      // is an Object and has no keys
+      // ! is an Object and has no keys
       (value.constructor === Object && Object.keys(value).length === 0)
     )
   }
