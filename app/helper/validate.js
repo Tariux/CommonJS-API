@@ -1,5 +1,5 @@
 class XValidate { // ? this class will validate data types/variables
-    // String validation
+    // ? String validation
     static isEmpty(str) {
       return !str || !str.trim();
     }
@@ -12,7 +12,7 @@ class XValidate { // ? this class will validate data types/variables
       return this.isString(str) && str.trim() !== '';
     }
   
-    // Array validation
+    // ? Array validation
     static isEmptyArray(arr) {
       return !arr || arr.length === 0;
     }
@@ -25,7 +25,7 @@ class XValidate { // ? this class will validate data types/variables
       return this.isArray(arr) && arr.length > 0;
     }
   
-    // Object validation
+    // ? Object validation
     static isEmptyObject(obj) {
       return !obj || Object.keys(obj).length === 0;
     }
@@ -38,7 +38,7 @@ class XValidate { // ? this class will validate data types/variables
       return this.isObject(obj) && Object.keys(obj).length > 0;
     }
   
-    // Array of objects validation
+    // ? Array of objects validation
     static isEmptyArrayOfObjects(arr) {
       return this.isEmptyArray(arr) || this.isEmptyObject(arr[0]);
     }
@@ -51,7 +51,7 @@ class XValidate { // ? this class will validate data types/variables
       return this.isArrayOfObjects(arr) && arr.length > 0;
     }
   
-    // Other validation
+    // ? Other validation
     static isBoolean(bool) {
       return typeof bool === 'boolean';
     }

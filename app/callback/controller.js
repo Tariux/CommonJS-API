@@ -1,22 +1,16 @@
-const { _cr } = require("../helper/client-response");
+const { _ClientResponse } = require("../helper/ClientResponse");
 const { XHelper } = require("../helper/functions");
+const { FA } = require("../languages/lang");
 const { router } = require("../routes/routes");
 const url = require("url");
 
 class XController {
-  constructor() { // ? will init router in first run
+  constructor() {
+    // ? will init router in first run
     this.router = router;
   }
 
   async initContoller(request, response) {
-
-
-    // ? some fancy stuff 
-    console.log('\x1b[36m%s\x1b[0m' , ` :::::: ${request.method} Request!`);
-    console.log('\x1b[36m%s\x1b[0m' , ` :: route: ${request.url}`);
-    console.log('\x1b[36m%s\x1b[0m' , ` :: ip: (${request.socket.localAddress})`);
-    console.log('\x1b[36m%s\x1b[0m' , ` ::`);
-
     // ? parsing data to this.object
     this.request = request;
     this.response = response;
@@ -24,31 +18,39 @@ class XController {
 
     try {
       this.url = url.parse(this.request.url, true);
-
       // ? first check is a valid request
       if (this.isValidRequest()) {
-        await this.router.route(this.url.pathname, this.request, this.response , this.body); // * route method and pathname to router class
+        await this.router.route(
+          this.url.pathname,
+          this.request,
+          this.response,
+          this.body
+        ); // * route method and pathname to router class
       } else {
-        return _cr(response, 500, "درخواست نامعتبر!", false); // ! send error
+        return _ClientResponse(response, FA.INVALID_REQUEST, 400); // ! send error
       }
-    } catch (error) { // ! send error
-      return _cr(
-        response,
-        500,
-        "خطای ناشناخته در مسیریابی برنامه رخ داد!",
-        error
-      );
+    } catch (error) {
+      // ! send error
+      // ? this catch will handle all service and module errors
+      console.log(error);
+      return _ClientResponse(response, {
+        response: error,
+        message: FA.UNEXPECTED_ERROR,
+      }, 500);
     }
   }
-  isValidRequest() { // ? checking by is set method for validate request
+
+  isValidRequest() {
+    // ? checking by is set method for validate request
     if (!this.request || !this.request.method) {
       return false;
     }
     return true;
   }
 
-  async parseBody(request) { // ? parse chunked body into object
-    return new Promise((resolve, reject) => {
+  async parseBody(request) {
+    // ? parse chunked body into object
+    return new Promise((resolve) => {
       let body = "";
       let bodyChunks = [];
 
@@ -57,7 +59,6 @@ class XController {
       });
 
       request.on("end", async () => {
-
         try {
           let mergedBodyChunkBuffer = Buffer.concat(bodyChunks);
           body = mergedBodyChunkBuffer.toString("utf8");
@@ -66,11 +67,13 @@ class XController {
           } else {
             this.body = {};
           }
-
         } catch (error) {
-          resolve(_cr(this.response , 500 , 'ورودی نامعتبر!' , false))
+          resolve(_ClientResponse(this.response, {
+            message: FA.INPUT_ERROR,
+            response: error
+          }, 400));
         }
-  
+
         resolve(this.body);
       });
     });

@@ -1,23 +1,26 @@
+
 const XValidate = require("../../helper/validate");
+const { FA } = require("../../languages/lang");
 
 function getEmployeMiddleware(body) {
     if (XValidate.isEmpty(body.id)) {
         throw({
-            message: 'آیدی کاربر را لطفا وارد کنید!'
+            message: FA.PLEASE_ENTER_ID
         })
     }
     return true
 
 }
 function createEmployeMiddleware(body) {
+    //const {id, body, parent} = body;
     if (!body.id || !body.parent || !body.data) {
         throw({
-          message: "اطلاعات وارد شده صحیح نیست!",
+          message: FA.INVALID_USER_DATA,
         });
     }
     if (XValidate.isEmpty(body.data.name)) {
         throw({
-            message: "اطلاعات کاربر وارد شده صحیح نیست!",
+            message: FA.INVALID_USER_DATA,
         });
     }
 
@@ -26,7 +29,7 @@ function createEmployeMiddleware(body) {
 function dropEmployeMiddleware(body) {
     if (!body.id) {
         throw({
-          message: "اطلاعات وارد شده صحیح نیست!",
+            message: FA.INVALID_USER_DATA,
         });
     }
 
@@ -38,8 +41,8 @@ function updateEmployeMiddleware(body) {
     Object.keys(body.data).length <= 0
     ) {   
       return {
-        message: "لطفا مقدار برای بروزرسانی وارد کنید!",
-      };
+        message: FA.PLEASE_SEND_DATA,
+    };
     }
     
 

@@ -4,13 +4,10 @@ const { dropEmployeMiddleware , getEmployeMiddleware, createEmployeMiddleware , 
 
 const router = new XRouter() // ? a router class-object for this app
 
-
 router.post("/employeeService" , EmployeController , createEmployeMiddleware)
 router.get("/employeeService" , EmployeController , getEmployeMiddleware)
 router.put("/employeeService" , EmployeController , updateEmployeMiddleware)
 router.delete("/employeeService" , EmployeController , dropEmployeMiddleware)    
-
-
 
 module.exports = {
     router
