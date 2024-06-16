@@ -103,18 +103,17 @@ class EmployeService {
         // ! send error USER_CAN_NOT_BE_PARENT
         message: FA.USER_CAN_NOT_BE_PARENT,
         status: false,
-        statusCode: 303,
+        statusCode: 400,
       };
     }
 
     const employeHaveParent = await Redis.parent.hGetAll(parent_key)
-
     if (Object.keys(employeHaveParent) > 0) { // ? check have already a parent or not
       return {
         // ! send error USER_ALREADY_HAVE_PARENT
         message: FA.USER_ALREADY_HAVE_PARENT,
         status: false,
-        statusCode: 303,
+        statusCode: 400,
       };
     }
 
@@ -194,8 +193,14 @@ class EmployeService {
     let parent_key = `parent:${id}`;
     let employe_parent_key = `employe:${parent}`;
 
+    let [parentData , employeData] = await Promise.all(
+      [
+        Redis.employe.hGetAll(employe_parent_key), // ! get parent data for check exists and access
+        Redis.employe.hGetAll(employe_key), // ! get parent data for check exists and access
+      ]
+      )
+  
     // ! check employe exists
-    let employeData = await Redis.employe.hGetAll(employe_key);
     if (Object.keys(employeData).length <= 0) {
       return {
         message: FA.USER_NOT_FOUND,
@@ -203,10 +208,18 @@ class EmployeService {
     }
 
     // ! check parent exists
-    let parentData = await Redis.employe.hGetAll(employe_parent_key);
     if (Object.keys(parentData).length <= 0) {
       return {
         message: FA.PARENT_NOT_FOUND,
+      };
+    }
+
+    if (parentData.is_parent !== 'true') { // ? check parent have access or not
+      return {
+        // ! send error USER_CAN_NOT_BE_PARENT
+        message: FA.USER_CAN_NOT_BE_PARENT,
+        status: false,
+        statusCode: 400,
       };
     }
 
