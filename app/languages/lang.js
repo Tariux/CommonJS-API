@@ -14,7 +14,6 @@ module.exports = {
         NOT_FOUND : 'یافت نشد!',
         REQUEST_NOT_FOUND : 'درخواست یافت نشد!',
         USER_NOT_FOUND : 'کاربر یافت نشد!',
-        PARENT_NOT_FOUND : 'پرنت یافت نشد!',
         PAGE_NOT_FOUND : 'صفحه یافت نشد!',
         USER_CANNOT_BE_PARENT : 'کاربر معمولی نمیتواند به عنوان پرنت ذخیره شود!',
         PARENT_NOT_FOUND : 'کاربر والد پیدا نشد!',

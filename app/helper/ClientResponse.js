@@ -12,7 +12,7 @@ function _ClientResponse(responseObj, response, statusCode = 200) {
     statusBool = false;
   }
 
-
+  statusCode = (response.statusCode) ? response.statusCode : statusCode
 
   _LogResponse(statusCode, response, responseObj);
 
@@ -52,8 +52,6 @@ function responseConsoles(statusCode, response, responseObj) {
   let random = colors[Math.floor((Math.random()*colors.length))]
 
 
-
-
   consolePow(` :::::: [${responseObj.req.method} Request] ::::::::::::` , random)
   consolePow(` :: route: ${responseObj.req.url}`, random)
   consolePow(` :: ip: (${responseObj.req.socket.localAddress})`, random)
@@ -61,7 +59,7 @@ function responseConsoles(statusCode, response, responseObj) {
   consolePow(` :: response-status: ${JSON.stringify(statusCode) || 200}`, random)
   consolePow(` :: response-type: ${JSON.stringify(typeof response)}`, random)
   consolePow(` :: response-length: ${Object.keys(response).length}`, random)
-  consolePow(` :: response-value: ${response}` , random)
+  consolePow(` :: response-value: ${JSON.stringify(response)}` , random)
   consolePow(` :: response-message: ${response.message || ""}`, random)
   if (response instanceof Error) {
     consolePow(`:: error-message: ${response.message}` , 'red')

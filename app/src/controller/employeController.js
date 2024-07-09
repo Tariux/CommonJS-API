@@ -23,7 +23,7 @@ class EmployeController extends ModuleInit {
   }
 
   async post() {
-    const post = await this.service.createEmploye(this.body.id , this.body.parent , this.body.data , (this.body.is_parent) ? true : false);
+    const post = await this.service.createEmploye(this.body.id , this.body.data , (this.body.is_parent) ? true : false);
 
     if (post) {
       return _ClientResponse(this.response , {
@@ -35,7 +35,8 @@ class EmployeController extends ModuleInit {
   }
 
   async update() {
-    const update = await this.service.updateEmploye(this.body.id , this.body.parent, this.body.data);
+    console.log('this.body.id' , this.body.id);
+    const update = await this.service.updateEmploye(this.body.id ,  this.body.data);
 
     if (update) {
       return _ClientResponse(this.response , {

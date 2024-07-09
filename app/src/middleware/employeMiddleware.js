@@ -13,12 +13,12 @@ function getEmployeMiddleware(body) {
 }
 function createEmployeMiddleware(body) {
     //const {id, body, parent} = body;
-    if (!body.id || !body.parent || !body.data) {
+    if (!body.id || !body.data) {
         throw({
           message: FA.INVALID_USER_DATA,
         });
     }
-    if (XValidate.isEmpty(body.data.name)) {
+    if (XValidate.isEmpty(body.data.nationalCode)) {
         throw({
             message: FA.INVALID_USER_DATA,
         });
