@@ -37,9 +37,16 @@ function dropEmployeMiddleware(body) {
 }
 
 function updateEmployeMiddleware(body) {
-    if ((!body.id && !body.parent && !body.data) || 
-    Object.keys(body.data).length <= 0
-    ) {   
+    console.log('BODY BODY ', body);
+    if (!body.parent) {
+        if (Object.keys(body.data).length <= 0) {
+            return {
+                message: FA.PLEASE_SEND_DATA,
+            };
+        }
+    }
+    if (!body.id && !body.parent && !body.data)
+    {   
       return {
         message: FA.PLEASE_SEND_DATA,
     };
