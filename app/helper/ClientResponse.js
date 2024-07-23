@@ -1,6 +1,6 @@
 var pjson = require("../../package.json");
 var cjson = require("../config/default.json");
-var coolors = require('colors/safe');
+var coolors = require("colors/safe");
 
 function _ClientResponse(responseObj, response, statusCode = 200) {
   // ? client response
@@ -12,7 +12,7 @@ function _ClientResponse(responseObj, response, statusCode = 200) {
     statusBool = false;
   }
 
-  statusCode = (response.statusCode) ? response.statusCode : statusCode
+  statusCode = response.statusCode ? response.statusCode : statusCode;
 
   _LogResponse(statusCode, response, responseObj);
 
@@ -33,7 +33,7 @@ function _LogResponse(statusCode, response, responseObj = false) {
   let status = false;
   if (statusCode >= 200 || statusCode <= 300) {
     status = true;
-  } 
+  }
 
   if (responseObj) {
     // ? some fancy stuff
@@ -43,30 +43,17 @@ function _LogResponse(statusCode, response, responseObj = false) {
   return response;
 }
 
-function consolePow(text , color = 'green') {
+function consolePow(text, color = "green") {
   console.log(coolors[color](text));
 }
 function responseConsoles(statusCode, response, responseObj) {
-
-  let colors = ['yellow', 'cyan', 'magenta', 'red', 'green', 'blue' , 'bgWhite' , 'bgGreen' , 'bgYellow' , 'bgRed']
-  let random = colors[Math.floor((Math.random()*colors.length))]
-
-
-  consolePow(` :::::: [${responseObj.req.method} Request] ::::::::::::` , random)
-  consolePow(` :: route: ${responseObj.req.url}`, random)
-  consolePow(` :: ip: (${responseObj.req.socket.localAddress})`, random)
-  consolePow(` :: Response ${responseObj.req.url} ${responseObj.req.method}!`, random)
-  consolePow(` :: response-status: ${JSON.stringify(statusCode) || 200}`, random)
-  consolePow(` :: response-type: ${JSON.stringify(typeof response)}`, random)
-  consolePow(` :: response-length: ${Object.keys(response).length}`, random)
-  consolePow(` :: response-value: ${JSON.stringify(response)}` , random)
-  consolePow(` :: response-message: ${response.message || ""}`, random)
-  if (response instanceof Error) {
-    consolePow(`:: error-message: ${response.message}` , 'red')
-    consolePow(`:: error-name: ${response.name}`, 'red')
-  }
-  consolePow(` :::::::::::::::::::::::::::::::::::.` , random)
-
+  let error_title = `${JSON.stringify(statusCode) || 200} ${responseObj.req.method || "UNKNOWN"} ${
+    responseObj.req.url
+  } from ${responseObj.req.socket.localAddress} length(${
+    Object.keys(response).length
+  }) type(${JSON.stringify(typeof response)})`;
+  Logger.ok(error_title, response.message || JSON.stringify(response));
+  console.log('⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ⏑ ');
 }
 
 function _cwelcome() {
@@ -78,8 +65,96 @@ function _cwelcome() {
   ::   Version ${pjson.version}   ::
   ::     Port ${cjson.port}     ::
   :: Server is Running ::
-  :: :: :: :: :: :: :: ::`)
-
+  :: :: :: :: :: :: :: ::`);
 }
 
 module.exports = { _ClientResponse, _LogResponse, _cwelcome };
+
+class Logger {
+  /**
+   * Parses the log entry and adds it to the logs
+   * @param {string} type - The type of log (e.g., SUCCESS, ERROR)
+   * @param {string} title - The title of the log entry
+   * @param {string} description - The description of the log entry
+   */
+  static parseLogEntry(type, title, description) {
+    const logEntry = {
+      type,
+      title,
+      description,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log(
+      `${logEntry.type} ${logEntry.title} ${logEntry.description}`,
+      `[${new Date(logEntry.timestamp).toLocaleString()}]`
+    );
+  }
+
+  /**
+   * Logs a success message
+   * @param {string} title - The title of the log entry
+   * @param {string} description - The description of the log entry
+   */
+  static ok(title, data = "EMPTY", description = "") {
+    const eid = Math.round(Math.random() * 10000);
+
+    Logger.parseLogEntry(
+      ` ▣ 🚀 ↪  (SERVICE) OK! [${eid}] ⇨ `,
+      title,
+      description
+    );
+    if (typeof data === "object") {
+      data.forEach((res, index) => {
+        res = match.toString();
+        console.log(` ▢ 🌀 ↪  (SERVICE)[${index}]⇢ ${res} |ID⇢[${eid}]`);
+      });
+    } else {
+      console.log(` ▢ 🌀 ↪ (SERVICE)⇢ ${data} |ID⇢[${eid}]`);
+    }
+  }
+
+  static error(title, errorObject) {
+    if (errorObject instanceof Error) {
+      const eid = Math.round(Math.random() * 10000);
+
+      const stackRegex = /at\s(.*?)\s\((.*?):(\d+):(\d+)\)/g;
+      const matches = [...errorObject.stack.matchAll(stackRegex)];
+      Logger.parseLogEntry(
+        ` ▣ ↪ ⚠️ ERROR! [${eid}][${title}] (type Error) ⇨ ${errorObject.name} `,
+        errorObject.message,
+        ``
+      );
+
+      matches.forEach((match, index) => {
+        console.log(
+          ` ▢ ↪ [${eid}][${index}] Function⇢ ${match[1]}, File⇢ ${match[2]}, Line⇢ ${match[3]}, Column⇢ ${match[4]}`
+        );
+      });
+    } else if (typeof errorObject === "object") {
+      let message, code;
+      if (typeof errorObject.data === "object") {
+        message = errorObject.data.message;
+        code = errorObject.meta.code;
+      } else if (errorObject.message) {
+        message = errorObject.message;
+      } else {
+        message = JSON.stringify(errorObject);
+      }
+
+      Logger.parseLogEntry(
+        `▣ ↪ ⚠️ [ ${code ? code : "UNKNOWN"} ERROR! ] (object)`,
+        title,
+        JSON.stringify(message)
+      );
+    } else {
+      Logger.parseLogEntry(
+        "▣ ↪ ⚠️ [UNKNOWN ERROR] (string)",
+        title,
+        JSON.stringify(errorObject)
+      );
+    }
+  }
+}
+const loggerObject = new Logger();
+exports.Logger = loggerObject;
