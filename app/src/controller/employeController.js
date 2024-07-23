@@ -14,9 +14,7 @@ class EmployeController extends ModuleInit {
     const get = await this.service.getEmploye(this.body.id)
 
     if (get) {
-      return _ClientResponse(this.response , {
-        ...get
-      });
+      return _ClientResponse(this.response , get);
     } else {
       return _ClientResponse(this.response , FA.GET_USER_FAIL , 400);
     }
@@ -26,9 +24,7 @@ class EmployeController extends ModuleInit {
     const post = await this.service.createEmploye(this.body.id , this.body.data);
 
     if (post) {
-      return _ClientResponse(this.response , {
-        ...post
-      });
+      return _ClientResponse(this.response , post);
     } else {
       return _ClientResponse(this.response , FA.ADD_USER_FAIL , 400);
     }
@@ -39,9 +35,7 @@ class EmployeController extends ModuleInit {
     const update = await this.service.updateEmploye(this.body.id ,  this.body.data);
 
     if (update) {
-      return _ClientResponse(this.response , {
-        ...update
-      });
+      return _ClientResponse(this.response , update);
     } else {
       return _ClientResponse(this.response , FA.UPDATE_USER_FAIL , 400);
     }
@@ -51,9 +45,7 @@ class EmployeController extends ModuleInit {
     const drop = await this.service.dropEmploye(this.body.id)
 
     if (drop) {
-      return _ClientResponse(this.response , {
-        ...drop
-      });
+      return _ClientResponse(this.response , drop);
     } else {
       return _ClientResponse(this.response , FA.DELETE_USER_FAIL , 400);
     }
