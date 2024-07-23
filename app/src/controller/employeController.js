@@ -23,7 +23,7 @@ class EmployeController extends ModuleInit {
   }
 
   async post() {
-    const post = await this.service.createEmploye(this.body.id , this.body.data , (this.body.is_parent) ? true : false);
+    const post = await this.service.createEmploye(this.body.id , this.body.data);
 
     if (post) {
       return _ClientResponse(this.response , {

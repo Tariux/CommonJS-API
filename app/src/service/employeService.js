@@ -2,48 +2,15 @@ const { Redis } = require("../../database/redis");
 const { FA } = require("../../languages/lang");
 
 class EmployeService {
-  constructor() {
-    this.initDefaultEmploye(); // ? this will init default user after calling this service
-  }
 
-  async initDefaultEmploye() {
-    // ? this function creates a default user for initialize program
-    try {
-      // ? making the keys
-      let defaultKey = `employe:1`;
-      let defaultEmploye = await Redis.employe.hGetAll(defaultKey); // ? get data for check created before or not
-
-      if (Object.keys(defaultEmploye).length <= 0) {
-        // ? check if is not created
-        let defaultData = {
-          // ? making data template
-          name: "default",
-          age: "default",
-        };
-
-        await Redis.employe.hSet(defaultKey, {
-          id: 1,
-          data: JSON.stringify(defaultData),
-          is_parent: "true",
-        }); // * this will creates a default user by data and response
-        return true;
-      } else {
-        // * return default data if created before
-        return defaultEmploye;
-      }
-    } catch (error) {
-      return {
-        message: FA.FAIL,
-        response: error,
-        statusCode: 400,
-      };
-    }
-  }
-
+  /**
+   * Get employe data by ID
+   * @param {string} id - Employe ID
+   * @returns {Promise<Object>} Employe data or error message
+   */
   async getEmploye(id) {
     try {
       // ? make the keys
-      console.log(id);
       let employe_key = `employe:${id}`;
 
       let employeData = await Redis.employe.hGetAll(employe_key); // ? get employe data
@@ -52,12 +19,8 @@ class EmployeService {
         employeData.data = {
           ...JSON.parse(employeData.data),
           childs: await this.getAllUserChilds(id),
-          is_parent: employeData.is_parent,
         };
-        console.log({
-          response: employeData,
-          message: FA.GET_USER_SUCCESS,
-        });
+
         return {
           response: {
             ...employeData,
@@ -81,16 +44,21 @@ class EmployeService {
     }
   }
 
-  async createEmploye(id, data, is_parent = false) {
+  /**
+   * Create a new employe
+   * @param {string} id - Employe ID
+   * @param {Object} data - Employe data
+   * @returns {Promise<Object>} Success or error message
+   */
+  async createEmploye(id, data) {
     // ? make the keys
     let employe_key = `employe:${id}`;
     let parent_key = `parent:${id}`;
     // let employe_parent_key = `employe:${parent}`;
 
-    let [checkEmploye] = await Promise.all(
-      [Redis.employe.hGetAll(employe_key)]
+    let checkEmploye = await Redis.employe.hGetAll(employe_key)
       // Redis.employe.hGetAll(employe_parent_key), // ! get parent data for check exists and access
-    );
+   
     if (Object.keys(checkEmploye).length > 0) {
       // ? check user exists or not
       return {
@@ -101,25 +69,6 @@ class EmployeService {
       };
     }
 
-    // if (is_parent === false) {
-    //   if (Object.keys(parentData).length <= 0) { // ? check parent exist or not
-    //     return {
-    //       // ! send error PARENT_NOT_FOUND
-    //       message: FA.PARENT_NOT_FOUND,
-    //       status: false,
-    //       statusCode: 400,
-    //     };
-    //   }
-    // }
-
-    // if (parentData.is_parent !== 'true') { // ? check parent have access or not
-    //   return {
-    //     // ! send error USER_CAN_NOT_BE_PARENT
-    //     message: FA.USER_CAN_NOT_BE_PARENT,
-    //     status: false,
-    //     statusCode: 400,
-    //   };
-    // }
 
     const employeHaveParent = await Redis.parent.hGetAll(parent_key);
     if (Object.keys(employeHaveParent) > 0) {
@@ -136,13 +85,10 @@ class EmployeService {
       // ? make data ready from template
       id: id,
       data: JSON.stringify(data),
-      is_parent: is_parent.toString(),
     };
 
     try {
-      // if (!is_parent) {
-      //   await Redis.parent.set(parent_key, parent); // ? create parent relation
-      // }
+
       let createEmploye = await Redis.employe.hSet(employe_key, employeData); // ? create employe data
 
       return {
@@ -159,6 +105,11 @@ class EmployeService {
     }
   }
 
+  /**
+   * Delete an employe by ID
+   * @param {string} id - Employe ID
+   * @returns {Promise<Object>} Success or error message
+   */
   async dropEmploye(id) {
     try {
       // ? try to make the keys
@@ -197,8 +148,14 @@ class EmployeService {
         statusCode: 400,
       };
     }
-  }
+  } 
 
+  /**
+   * Update employe data by ID
+   * @param {string} id - Employe ID
+   * @param {Object} data - New employe data
+   * @returns {Promise<Object>} Success or error message
+   */
   async updateEmploye(id, data) {
     try {
       const newData = await this.updateEmployeProfile(id, data);
@@ -221,15 +178,18 @@ class EmployeService {
     }
   }
 
-
+  /**
+   * Update employe profile data
+   * @param {string} userID - Employe ID
+   * @param {Object} data - New employe data
+   * @returns {Promise<Object|boolean>} Updated employe data or false
+   */
   async updateEmployeProfile(userID, data) {
     let employeKey = `employe:${userID}`;
 
     let employeData = await Redis.employe.hGetAll(employeKey);
-    console.log("employeKey", employeKey);
-    console.log("employeData", employeData);
     // ! check employe exists
-    if (Object.keys(employeData).length <= 0) {
+    if (!employeData) {
       throw {
         message: FA.USER_NOT_FOUND,
       };
@@ -239,21 +199,16 @@ class EmployeService {
       // ? make new data from template
 
       id: userID,
-      is_parent: ((data.is_parent) ? data.is_parent : false).toString() ,
       data: JSON.stringify({
         ...JSON.parse(employeData.data),
         ...data,
       }),
     };
-    console.log('newData', newData);
-    console.log('data', data);
 
     if (data.parent && data.parent !== '') {
       const assign = await this.assignParent(userID , data.parent)
       console.log('assign parent to user' , assign);
     }
-
-
 
     try {
       await Redis.employe.hSet(employeKey, newData); // ? update employe
@@ -265,49 +220,20 @@ class EmployeService {
       return false;
     }
   }
-  async getAllParents() {
-    try {
-      const keys = await Redis.employe.keys("employe:*");
-      const parentEmployes = [];
 
-      for (const key of keys) {
-        const employeData = await Redis.employe.hGetAll(key);
-        if (employeData.is_parent === "true") {
-          parentEmployes.push(employeData);
-        }
-      }
-
-      return parentEmployes;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  async getAllUsersByParent(parentID) {
-    try {
-      const keys = await Redis.employe.keys("employe:*");
-      const childEmployes = [];
-
-      for (const key of keys) {
-        const employeData = await Redis.employe.hGetAll(key);
-        if (employeData.parent_id === parentID) {
-          childEmployes.push(employeData);
-        }
-      }
-
-      return childEmployes;
-    } catch (error) {
-      return false;
-    }
-  }
-
+  /**
+   * Assign a parent to an employe
+   * @param {string} userID - Employe ID
+   * @param {string} parentID - Parent ID
+   * @returns {Promise<Object|boolean>} Success message or false
+   */
   async assignParent(userID, parentID) {
     const parentKey = `parent:${userID}`;
     try {
       const parentData = await Redis.employe.hGetAll(`employe:${parentID}`);
+
       if (
-        Object.keys(parentData).length <= 0 ||
-        parentData.is_parent !== "true"
+        Object.keys(parentData).length <= 0 
       ) {
         return {
           message: FA.PARENT_NOT_FOUND,
@@ -324,6 +250,11 @@ class EmployeService {
     }
   }
 
+  /**
+   * Get all child employes by parent ID
+   * @param {string} parentID - Parent ID
+   * @returns {Promise<Array|boolean>} List of child employes or false
+   */
   async getAllUserChilds(parentID) {
     try {
       const childEmployes = [];

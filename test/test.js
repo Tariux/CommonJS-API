@@ -21,7 +21,7 @@ const chai = require("chai");
 //     it("check connection for redis server", async function (done) {
 //       const calledAsync = await new Promise(async (resolve, reject) => {
 //         const redis = await new RedisConeection();
-//         const connection = Redis.employeUniqueID();
+//         const connection = Redis.employeuniqueKey();
 //         resolve(true);
 //         done();
 //       });
