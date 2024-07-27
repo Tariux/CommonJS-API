@@ -11,46 +11,56 @@ class EmployeController extends ModuleInit {
   }
 
   async index() {
-    const get = await this.service.getEmploye(this.body.id)
-
-    if (get) {
-      return _ClientResponse(this.response , get);
-    } else {
+    try {
+      const get = await this.service.getEmploye(this.body.id);
+      if (get) {
+        return _ClientResponse(this.response , get);
+      } else {
+        return _ClientResponse(this.response , FA.GET_USER_FAIL , 400);
+      }
+    } catch (error) {
+      console.log('index ERROR:::' , error);
       return _ClientResponse(this.response , FA.GET_USER_FAIL , 400);
     }
   }
 
   async post() {
-    const post = await this.service.createEmploye(this.body.id , this.body.data);
-
-    if (post) {
-      return _ClientResponse(this.response , post);
-    } else {
+    try {
+      const post = await this.service.createEmploye(this.body.id , this.body.data);
+      if (post) {
+        return _ClientResponse(this.response , post);
+      } else {
+        return _ClientResponse(this.response , FA.ADD_USER_FAIL , 400);
+      }
+    } catch (error) {
+      console.log('post ERROR:::' , error);
       return _ClientResponse(this.response , FA.ADD_USER_FAIL , 400);
     }
   }
 
   async update() {
-    console.log('this.body.id' , this.body.id);
-    const update = await this.service.updateEmploye(this.body.id ,  this.body.data);
-
-    if (update) {
-      return _ClientResponse(this.response , update);
-    } else {
+    try {
+      const update = await this.service.updateEmploye(this.body.id ,  this.body.data);
+      if (update) {
+        return _ClientResponse(this.response , update);
+      } else {
+        return _ClientResponse(this.response , FA.UPDATE_USER_FAIL , 400);
+      }
+    } catch (error) {
+      console.log('update ERROR:::' , error);
       return _ClientResponse(this.response , FA.UPDATE_USER_FAIL , 400);
     }
   }
 
   async drop() {
-    const drop = await this.service.dropEmploye(this.body.id)
-
-    if (drop) {
+    try {
+      const drop = await this.service.dropEmploye(this.body.id);
       return _ClientResponse(this.response , drop);
-    } else {
+    } catch (error) {
+      console.log('drop ERROR:::' , error);
       return _ClientResponse(this.response , FA.DELETE_USER_FAIL , 400);
     }
   }
-
 
 }
 module.exports = {EmployeController};

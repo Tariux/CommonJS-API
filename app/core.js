@@ -21,7 +21,7 @@ class XCore {
         _cwelcome()
       });
     } catch (error) {
-      console.log(FA.UNEXPECTED_ERROR , error);
+      console.log('UNEXPECTED_ERROR' , error);
       return {
         error
       }

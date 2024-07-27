@@ -37,7 +37,6 @@ function dropEmployeMiddleware(body) {
 }
 
 function updateEmployeMiddleware(body) {
-    console.log('BODY BODY ', body);
     if (!body.parent) {
         if (Object.keys(body.data).length <= 0) {
             return {

@@ -46,7 +46,6 @@ class EmployeWorker {
         message: FA.USER_NOT_FOUND,
       };
     }
-    console.log('employeee data' , employeData);
     let newData = {
       // ? make new data from template
 

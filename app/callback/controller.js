@@ -30,9 +30,9 @@ class XController {
         return _ClientResponse(response, FA.INVALID_REQUEST, 400); // ! send error
       }
     } catch (error) {
+      console.log('ERROR-> CONTROLLER: ' , error);
       // ! send error
       // ? this catch will handle all service and module errors
-      console.log(error);
       return _ClientResponse(response, {
         response: error,
         message: FA.UNEXPECTED_ERROR,
