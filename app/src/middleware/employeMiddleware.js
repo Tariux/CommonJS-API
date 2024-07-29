@@ -42,7 +42,7 @@ function updateEmployeMiddleware(body) {
             return {
                 message: FA.PLEASE_SEND_DATA,
             };
-        }
+        }   
     }
     if (!body.id && !body.parent && !body.data)
     {   

@@ -17,22 +17,18 @@ class EmployeService {
     try {
       // ? make the keys
       let employe_key = `employe:${id}`;
+      let employeData = await this.worker.getEmploye(employe_key); // ? get employe data
 
-      let employeData = await Promise.all([ // ? Promise.all is for optimize this can be seprate
-        this.worker.getEmploye(employe_key), // ? get employe data
-        this.worker.getAllUserChilds(id) // ? get all user childs
-      ]).then(([data, childs]) => {
-        data.data = {
-          ...JSON.parse(data.data),
-          childs: childs,
-        };
-        return data;
-      });
+      if (!employeData) {
+        throw new Error(FA.USER_NOT_FOUND);
+      }
+
+      employeData.data = {
+        ...JSON.parse(employeData.data),
+      };
 
       return {
-        response: {
-          ...employeData,
-        },
+        response: employeData,
         message: FA.GET_USER_SUCCESS,
       }; // * send response
     } catch (error) {
@@ -46,6 +42,41 @@ class EmployeService {
       };
     }
   }
+
+  async getChilds(id) {
+    try {
+      let childs = await this.worker.getAllUserChilds(id); // ? get all user childs
+
+      if (!childs) {
+        throw new Error(FA.SERVER_ERROR);
+      }
+      if (childs.length <= 0) {
+        throw new Error(FA.PARENT_NOT_FOUND);
+      }
+      // Format and optimize the child data for faster access
+      const formattedChilds = childs.map(child => ({
+        ...JSON.parse(child.data)
+      }));
+      return {
+        response: formattedChilds,
+        message: FA.GET_USER_SUCCESS,
+      };
+
+      return {
+        response: childs,
+        message: FA.GET_USER_SUCCESS,
+      }; // * send response
+    } catch (error) {
+      console.log(error);
+      return {
+        // ! send error
+        message: (error.message) ? error.message : FA.GET_USER_FAIL,
+        statusCode: 400,
+      };
+    }
+  }
+
+
 
   /**
    * Create a new employe
