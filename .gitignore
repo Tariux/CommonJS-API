@@ -1,1 +1,15 @@
 /node_modules
+node_modules
+.node_modules
+ node_modules
+.package-lock.json
+.npmrc
+.idea
+.codelite
+.vscode
+ npm-debug*.log
+.nyc_output
+/logs
+logs
+.logs
+ logs
